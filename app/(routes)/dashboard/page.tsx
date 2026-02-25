@@ -130,16 +130,15 @@ const calculatePercentage = (value: number, min: number, max: number) =>
 
 // --- CUSTOM HOOKS ---
 const useAquaponicsSettings = () => {
-  const [state, setState] = useState(loadState);
+  const [state, setState] = useState({ 
+    controls: INITIAL_CONTROLS_FULL, 
+    activePreset: "balanced", 
+    thresholds: INITIAL_THRESHOLDS 
+  });
 
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === localStorageKey && e.newValue) {
-        setState(JSON.parse(e.newValue));
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    const saved = loadState();
+    setState(saved);
   }, []);
 
   const quickSaveControls = (newControls: SystemControls) => {
@@ -156,6 +155,7 @@ const useAquaponicsSettings = () => {
     activePreset: state.activePreset, 
     thresholds: state.thresholds 
   }
+}
 }
 
 // --- ALERT GENERATION ---
@@ -316,7 +316,7 @@ export default function Dashboard() {
   const { controls, quickSaveControls, thresholds } = useAquaponicsSettings()
   
   // State
-  const [currentTime, setCurrentTime] = useState<Date>(new Date())
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [expandedAlert, setExpandedAlert] = useState<number | null>(null)
   const [showControlsModal, setShowControlsModal] = useState<boolean>(false)
   const [showCameraModal, setShowCameraModal] = useState<boolean>(false)
@@ -412,17 +412,10 @@ export default function Dashboard() {
         // Dashboard continues showing last known values
       }
       
-      setCurrentTime(new Date())
-    }
-
-    // Fetch immediately on mount
-    fetchSensorData()
-    
-    // Then fetch every 3 seconds
-    const interval = setInterval(fetchSensorData, 3000)
-
-    return () => clearInterval(interval)
-  }, [thresholds])
+      setCurrentTime(new Date());
+    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Handle control save
   const handleQuickControlsSave = async () => {
@@ -629,7 +622,10 @@ export default function Dashboard() {
   // Main Render
   return (
     <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
-      <Navbar time={currentTime.toLocaleTimeString()} isConnected={isRaspiConnected} />
+      <Navbar 
+    time={currentTime ? currentTime.toLocaleTimeString() : "--:--:--"} 
+    isConnected={isRaspiConnected} 
+  />
       
       <div className="space-y-5 pb-24 px-4 py-5">
         {/* System Header */}
@@ -640,7 +636,9 @@ export default function Dashboard() {
               <p className="text-emerald-100 text-sm">Aquaponics Tower System</p>
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">{currentTime.toLocaleTimeString()}</div>
+              <div className="text-2xl font-bold">
+    {currentTime ? currentTime.toLocaleTimeString() : "Loading..."}
+  </div>
               <div className="text-xs text-emerald-100 flex items-center justify-end gap-1 mt-1">
                 <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse"></div>
                 Live
