@@ -34,13 +34,11 @@ import { usePathname } from "next/navigation"
 type SensorKey =
   | "waterTemp"
   | "ph"
-  | "dissolvedO2"
   | "airTemp"
   | "lightIntensity"
   | "waterLevel"
   | "waterFlow"
   | "humidity"
-  | "ammonia"
   | "airPressure"
 
 type SensorState = Record<SensorKey, boolean>
@@ -75,312 +73,264 @@ const SENSOR_TREND_DATA: SensorTrendRow[] = [
     time: "00:00",
     waterTemp: 22.5,
     ph: 6.8,
-    dissolvedO2: 8.2,
     airTemp: 24.0,
     lightIntensity: 0,
     waterLevel: 85,
     waterFlow: 12,
     humidity: 65,
-    ammonia: 0.02,
     airPressure: 1012.5,
   },
   {
     time: "01:00",
     waterTemp: 22.3,
     ph: 6.8,
-    dissolvedO2: 8.3,
     airTemp: 23.5,
     lightIntensity: 0,
     waterLevel: 84,
     waterFlow: 12,
     humidity: 67,
-    ammonia: 0.02,
     airPressure: 1013.0,
   },
   {
     time: "02:00",
     waterTemp: 22.1,
     ph: 6.9,
-    dissolvedO2: 8.4,
     airTemp: 23.0,
     lightIntensity: 0,
     waterLevel: 84,
     waterFlow: 12,
     humidity: 68,
-    ammonia: 0.01,
     airPressure: 1013.5,
   },
   {
     time: "03:00",
     waterTemp: 22.2,
     ph: 6.9,
-    dissolvedO2: 8.5,
     airTemp: 23.0,
     lightIntensity: 0,
     waterLevel: 84,
     waterFlow: 12,
     humidity: 68,
-    ammonia: 0.01,
     airPressure: 1014.1,
   },
   {
     time: "04:00",
     waterTemp: 22.2,
     ph: 6.9,
-    dissolvedO2: 8.5,
     airTemp: 23.0,
     lightIntensity: 0,
     waterLevel: 84,
     waterFlow: 12,
     humidity: 68,
-    ammonia: 0.01,
     airPressure: 1014.1,
   },
   {
     time: "05:00",
     waterTemp: 22.3,
     ph: 6.9,
-    dissolvedO2: 8.4,
     airTemp: 23.5,
     lightIntensity: 0,
     waterLevel: 83,
     waterFlow: 12,
     humidity: 67,
-    ammonia: 0.02,
     airPressure: 1014.5,
   },
   {
     time: "06:00",
     waterTemp: 22.6,
     ph: 7.0,
-    dissolvedO2: 8.3,
     airTemp: 24.5,
     lightIntensity: 150,
     waterLevel: 83,
     waterFlow: 13,
     humidity: 65,
-    ammonia: 0.02,
     airPressure: 1015.0,
   },
   {
     time: "07:00",
     waterTemp: 22.9,
     ph: 7.0,
-    dissolvedO2: 8.2,
     airTemp: 25.5,
     lightIntensity: 300,
     waterLevel: 83,
     waterFlow: 13,
     humidity: 63,
-    ammonia: 0.02,
     airPressure: 1015.2,
   },
   {
     time: "08:00",
     waterTemp: 23.1,
     ph: 7.0,
-    dissolvedO2: 8.1,
     airTemp: 26.0,
     lightIntensity: 450,
     waterLevel: 83,
     waterFlow: 13,
     humidity: 62,
-    ammonia: 0.02,
     airPressure: 1015.3,
   },
   {
     time: "09:00",
     waterTemp: 23.5,
     ph: 7.0,
-    dissolvedO2: 8.0,
     airTemp: 27.0,
     lightIntensity: 600,
     waterLevel: 82,
     waterFlow: 13,
     humidity: 60,
-    ammonia: 0.02,
     airPressure: 1015.1,
   },
   {
     time: "10:00",
     waterTemp: 23.9,
     ph: 7.1,
-    dissolvedO2: 7.9,
     airTemp: 28.0,
     lightIntensity: 750,
     waterLevel: 82,
     waterFlow: 13,
     humidity: 59,
-    ammonia: 0.03,
     airPressure: 1014.5,
   },
   {
     time: "11:00",
     waterTemp: 24.2,
     ph: 7.1,
-    dissolvedO2: 7.8,
     airTemp: 28.5,
     lightIntensity: 800,
     waterLevel: 82,
     waterFlow: 13,
     humidity: 58,
-    ammonia: 0.03,
     airPressure: 1014.0,
   },
   {
     time: "12:00",
     waterTemp: 24.5,
     ph: 7.1,
-    dissolvedO2: 7.8,
     airTemp: 29.0,
     lightIntensity: 850,
     waterLevel: 82,
     waterFlow: 13,
     humidity: 58,
-    ammonia: 0.03,
     airPressure: 1013.8,
   },
   {
     time: "13:00",
     waterTemp: 24.8,
     ph: 7.1,
-    dissolvedO2: 7.7,
     airTemp: 29.5,
     lightIntensity: 800,
     waterLevel: 81,
     waterFlow: 12,
     humidity: 57,
-    ammonia: 0.03,
     airPressure: 1013.0,
   },
   {
     time: "14:00",
     waterTemp: 25.0,
     ph: 7.1,
-    dissolvedO2: 7.6,
     airTemp: 29.2,
     lightIntensity: 750,
     waterLevel: 81,
     waterFlow: 12,
     humidity: 58,
-    ammonia: 0.03,
     airPressure: 1012.5,
   },
   {
     time: "15:00",
     waterTemp: 24.9,
     ph: 7.0,
-    dissolvedO2: 7.6,
     airTemp: 28.5,
     lightIntensity: 680,
     waterLevel: 81,
     waterFlow: 12,
     humidity: 59,
-    ammonia: 0.03,
     airPressure: 1011.8,
   },
   {
     time: "16:00",
     waterTemp: 24.8,
     ph: 7.0,
-    dissolvedO2: 7.6,
     airTemp: 28.0,
     lightIntensity: 620,
     waterLevel: 81,
     waterFlow: 12,
     humidity: 60,
-    ammonia: 0.02,
     airPressure: 1011.0,
   },
   {
     time: "17:00",
     waterTemp: 24.5,
     ph: 7.0,
-    dissolvedO2: 7.7,
     airTemp: 27.0,
     lightIntensity: 500,
     waterLevel: 81,
     waterFlow: 12,
     humidity: 62,
-    ammonia: 0.02,
     airPressure: 1011.0,
   },
   {
     time: "18:00",
     waterTemp: 24.1,
     ph: 6.9,
-    dissolvedO2: 7.8,
     airTemp: 26.0,
     lightIntensity: 300,
     waterLevel: 82,
     waterFlow: 12,
     humidity: 63,
-    ammonia: 0.02,
     airPressure: 1011.5,
   },
   {
     time: "19:00",
     waterTemp: 23.8,
     ph: 6.9,
-    dissolvedO2: 7.9,
     airTemp: 25.5,
     lightIntensity: 200,
     waterLevel: 82,
     waterFlow: 12,
     humidity: 64,
-    ammonia: 0.02,
     airPressure: 1012.0,
   },
   {
     time: "20:00",
     waterTemp: 23.5,
     ph: 6.9,
-    dissolvedO2: 8.0,
     airTemp: 25.0,
     lightIntensity: 120,
     waterLevel: 82,
     waterFlow: 12,
     humidity: 64,
-    ammonia: 0.02,
     airPressure: 1012.2,
   },
   {
     time: "21:00",
     waterTemp: 23.2,
     ph: 6.8,
-    dissolvedO2: 8.1,
     airTemp: 24.5,
     lightIntensity: 50,
     waterLevel: 83,
     waterFlow: 12,
     humidity: 65,
-    ammonia: 0.02,
     airPressure: 1012.5,
   },
   {
     time: "22:00",
     waterTemp: 22.9,
     ph: 6.8,
-    dissolvedO2: 8.1,
     airTemp: 24.2,
     lightIntensity: 0,
     waterLevel: 84,
     waterFlow: 12,
     humidity: 65,
-    ammonia: 0.02,
     airPressure: 1012.8,
   },
   {
     time: "23:00",
     waterTemp: 22.7,
     ph: 6.8,
-    dissolvedO2: 8.2,
     airTemp: 24.1,
     lightIntensity: 0,
     waterLevel: 85,
     waterFlow: 12,
     humidity: 65,
-    ammonia: 0.02,
     airPressure: 1012.5,
   },
 ]
@@ -405,13 +355,6 @@ const sensorConfig: {
     name: "pH Level (PH4502C)",
     color: "#8b5cf6",
     unit: "",
-    format: (v) => v.toFixed(1),
-  },
-  {
-    key: "dissolvedO2",
-    name: "Dissolved O₂ (DO Sensor)",
-    color: "#10b981",
-    unit: "mg/L",
     format: (v) => v.toFixed(1),
   },
   {
@@ -456,13 +399,6 @@ const sensorConfig: {
     unit: "L/min",
     format: (v) => v.toFixed(0),
   },
-  {
-    key: "ammonia",
-    name: "Ammonia (MQ137)",
-    color: "#f97316",
-    unit: "ppm",
-    format: (v) => v.toFixed(2),
-  },
 ]
 
 /* UTILITY FUNCTIONS */
@@ -488,22 +424,12 @@ const downloadCSV = (filename: string, headers: string[], rows: any[][]) => {
 const calculateWaterQuality = (data: {
   waterTemp: number
   ph: number
-  dissolvedO2: number
-  ammonia: number
 }): number => {
   let score = 100
 
   // pH check (ideal: 6.5-7.5)
   if (data.ph < 6.5 || data.ph > 7.5) score -= 20
   else if (data.ph < 6.7 || data.ph > 7.3) score -= 10
-
-  // DO2 check (ideal: 5-8 mg/L)
-  if (data.dissolvedO2 < 5 || data.dissolvedO2 > 8) score -= 20
-  else if (data.dissolvedO2 < 6 || data.dissolvedO2 > 7.5) score -= 10
-
-  // Ammonia check (ideal: < 0.5 ppm)
-  if (data.ammonia > 1.0) score -= 30
-  else if (data.ammonia > 0.5) score -= 15
 
   // Temperature check (ideal: 20-26°C)
   if (data.waterTemp < 20 || data.waterTemp > 26) score -= 15
@@ -639,13 +565,11 @@ export default function Analytics() {
   const [selectedSensors, setSelectedSensors] = useState<SensorState>({
     waterTemp: true,
     ph: true,
-    dissolvedO2: true,
     airTemp: false,
     lightIntensity: false,
     waterLevel: false,
     waterFlow: false,
     humidity: false,
-    ammonia: false,
     airPressure: false,
   } as SensorState)
 
@@ -802,7 +726,6 @@ export default function Analytics() {
       d.time,
       `Water: ${d.waterTemp}°C`,
       `pH: ${d.ph}`,
-      `DO2: ${d.dissolvedO2}`,
       `Light: ${d.lightIntensity}lux`,
     ])
     downloadCSV(filename, headers, [...growthRows, [""], ...sensorRows])
@@ -812,13 +735,11 @@ export default function Analytics() {
   const localSensorConfig: { key: SensorKey; name: string; color: string }[] = [
     { key: "waterTemp", name: "Water Temp", color: "#3b82f6" },
     { key: "ph", name: "pH Level", color: "#8b5cf6" },
-    { key: "dissolvedO2", name: "Dissolved O₂", color: "#10b981" },
     { key: "airTemp", name: "Air Temp", color: "#f59e0b" },
     { key: "lightIntensity", name: "Light", color: "#eab308" },
     { key: "waterLevel", name: "Water Level", color: "#06b6d4" },
     { key: "waterFlow", name: "Flow Rate", color: "#6366f1" },
     { key: "humidity", name: "Humidity", color: "#14b8a6" },
-    { key: "ammonia", name: "Ammonia", color: "#f97316" },
     { key: "airPressure", name: "Air Pressure", color: "#ef4444" },
   ]
 
@@ -883,13 +804,11 @@ export default function Analytics() {
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }),
           waterTemp: d.waterTemp ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].waterTemp,
           ph: d.ph ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ph,
-          dissolvedO2: d.dissolvedO2 ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].dissolvedO2,
           airTemp: d.airTemp ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].airTemp,
           lightIntensity: d.lightIntensity ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].lightIntensity,
           waterLevel: d.waterLevel ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].waterLevel,
           waterFlow: d.waterFlow ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].waterFlow,
           humidity: d.humidity ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].humidity,
-          ammonia: d.ammonia ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ammonia,
           airPressure: d.airPressure ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].airPressure,
         }
 
@@ -1254,23 +1173,6 @@ export default function Analytics() {
                 <span className="font-semibold text-gray-900">Fish Health</span>
               </div>
               <div className="text-2xl font-bold text-emerald-600">
-                {((latestReading?.ammonia ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ammonia) < 0.5
-                  ? "Excellent"
-                  : (latestReading?.ammonia ?? 1) < 1.0
-                  ? "Good"
-                  : "Warning")}
-              </div>
-              <div className="text-xs text-gray-500 mt-2">Ammonia: {(latestReading?.ammonia ?? 0.02).toFixed(2)} ppm</div>
-              <div className="w-full h-1.5 bg-gray-200 rounded-full mt-3 overflow-hidden">
-                <div
-                  className={`h-full ${latestReading && latestReading.ammonia < 0.5 ? "bg-emerald-500" : "bg-amber-500"}`}
-                  style={{
-                    width: `${Math.max(0, Math.min(100, (1 - (latestReading?.ammonia ?? 0.02)) * 100))}%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-
             <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-3">
                 <Droplets className="w-5 h-5 text-blue-500" />
@@ -1280,13 +1182,8 @@ export default function Analytics() {
                 {calculateWaterQuality({
                   waterTemp: latestReading?.waterTemp ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].waterTemp,
                   ph: latestReading?.ph ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ph,
-                  dissolvedO2: latestReading?.dissolvedO2 ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].dissolvedO2,
-                  ammonia: latestReading?.ammonia ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ammonia,
                 })}
                 %
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                pH: {(latestReading?.ph ?? 6.8).toFixed(1)} • DO₂: {(latestReading?.dissolvedO2 ?? 7.8).toFixed(1)}mg/L
               </div>
               <div className="w-full h-1.5 bg-gray-200 rounded-full mt-3 overflow-hidden">
                 <div
@@ -1295,8 +1192,6 @@ export default function Analytics() {
                     width: `${calculateWaterQuality({
                       waterTemp: latestReading?.waterTemp ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].waterTemp,
                       ph: latestReading?.ph ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ph,
-                      dissolvedO2: latestReading?.dissolvedO2 ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].dissolvedO2,
-                      ammonia: latestReading?.ammonia ?? SENSOR_TREND_DATA[SENSOR_TREND_DATA.length - 1].ammonia,
                     })}%`,
                   }}
                 ></div>
