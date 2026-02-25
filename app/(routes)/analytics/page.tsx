@@ -18,8 +18,8 @@ type SensorState = Record<SensorKey, boolean>
 type SensorTrendRow = { time: string } & Record<SensorKey, number>
 type GrowthRow = { day: string; height: number; leaves: number; health: number }
 
-/* --- MOCK DATA --- */
-const WEEKLY_GROWTH_DATA: GrowthRow[] = [
+/* --- FALLBACK GROWTH DATA (used only if API unavailable) --- */
+const FALLBACK_GROWTH_DATA: GrowthRow[] = [
   { day: "W1 Mon", height: 12.5, leaves: 8, health: 92 },
   { day: "W1 Tue", height: 13.2, leaves: 9, health: 94 },
   { day: "W1 Wed", height: 14.1, leaves: 10, health: 95 },
@@ -199,6 +199,11 @@ export default function Analytics() {
   const [latestReading, setLatestReading] = useState<SensorTrendRow | undefined>(undefined)
   const [isRaspiConnected, setIsRaspiConnected] = useState(true)
 
+  // NEW: Real growth data from API
+  const [growthData, setGrowthData] = useState<GrowthRow[]>(FALLBACK_GROWTH_DATA)
+  const [growthLoading, setGrowthLoading] = useState(true)
+  const [growthError, setGrowthError] = useState(false)
+
   const MAX_SAMPLES = 200
 
   /* Time ticker */
@@ -244,14 +249,40 @@ export default function Analytics() {
     return () => { mounted = false; clearInterval(interval) }
   }, [])
 
+  /* NEW: Growth data fetch — polls every 60s */
+  useEffect(() => {
+    let mounted = true
+    const fetchGrowthData = async () => {
+      try {
+        const res = await fetch("/api/growth", { cache: "no-store" })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const json = await res.json()
+        if (json.status === "success" && Array.isArray(json.data) && json.data.length > 0) {
+          if (mounted) { setGrowthData(json.data); setGrowthError(false) }
+        } else {
+          if (mounted) setGrowthError(true)
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch growth data:", err)
+        if (mounted) setGrowthError(true)
+      } finally {
+        if (mounted) setGrowthLoading(false)
+      }
+    }
+    fetchGrowthData()
+    const interval = setInterval(fetchGrowthData, 60000)
+    return () => { mounted = false; clearInterval(interval) }
+  }, [])
+
   /* Derived data */
   const filteredGrowthData = (() => {
+    const half = Math.ceil(growthData.length / 2)
     switch (selectedRange) {
-      case "lastWeek":    return WEEKLY_GROWTH_DATA.slice(0, 7)
-      case "twoWeeks":    return WEEKLY_GROWTH_DATA.slice(0, 14)
-      case "customGrowth":return WEEKLY_GROWTH_DATA.slice(3)
+      case "lastWeek":    return growthData.slice(0, half)
+      case "twoWeeks":    return growthData
+      case "customGrowth":return growthData.slice(3)
       case "thisWeek":
-      default:            return WEEKLY_GROWTH_DATA.slice(7, 14)
+      default:            return growthData.slice(half)
     }
   })()
 
@@ -363,6 +394,19 @@ export default function Analytics() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-gray-900">Weekly Plant Growth</h3>
             <div className="flex gap-2">
+
+          {/* Growth data status banner */}
+          {growthLoading && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
+              <span className="text-xs text-blue-700 font-medium">Loading growth data...</span>
+            </div>
+          )}
+          {!growthLoading && growthError && (
+            <div className="flex items-center gap-2 mb-3 px-3 py-2 bg-amber-50 rounded-lg border border-amber-200">
+              <span className="text-xs text-amber-700 font-medium">⚠️ Using cached data — could not reach /api/growth</span>
+            </div>
+          )}
               <button onClick={() => setShowGrowthFilters(!showGrowthFilters)} className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-xs font-medium">
                 <Filter className="w-3.5 h-3.5" />{showGrowthFilters ? "Hide" : "Filters"}
               </button>
