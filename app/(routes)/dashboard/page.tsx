@@ -1,13 +1,16 @@
-//growup/updated/app/(routes)/dashboard/page.tsx
-
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Thermometer, Droplets, Activity, Zap, Waves, Gauge, Wind, Fish, ChevronDown, AlertTriangle, CheckCircle, Camera, Maximize2, Bell, X, Clock, Home, BarChart3, Settings, Sun, WifiOff } from "lucide-react"
+import { 
+  Thermometer, Droplets, Activity, Zap, Waves, Gauge, 
+  Wind, Fish, ChevronDown, AlertTriangle, CheckCircle, 
+  Camera, Maximize2, Bell, X, Clock, Home, BarChart3, 
+  Settings, Sun, WifiOff 
+} from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-// --- INTERFACES  ---
+// --- INTERFACES ---
 interface SystemControls { 
   pump: boolean; 
   fan: boolean; 
@@ -96,8 +99,10 @@ const localStorageKey = 'aquaponics_settings_state';
 // --- HELPER FUNCTIONS ---
 const loadState = (): { controls: SystemControls, activePreset: string, thresholds: ThresholdState } => { 
   try { 
-    const savedState = localStorage.getItem(localStorageKey); 
-    if (savedState) return JSON.parse(savedState); 
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem(localStorageKey); 
+      if (savedState) return JSON.parse(savedState);
+    }
   } catch (error) { 
     console.error('Error loading state:', error); 
   } 
@@ -217,14 +222,14 @@ const generateAlerts = (data: SensorDataState, thresholds: ThresholdState): Aler
 
 const Navbar: React.FC<{ time: string; isConnected: boolean }> = ({ time, isConnected }) => (
   <div className="bg-white px-4 py-2.5 flex items-center justify-between text-sm border-b border-gray-100 sticky top-0 z-40">
-    <span className="font-bold text-gray-900">GROWUP</span>
+    <span className="font-bold text-gray-900 tracking-tight">GROWUP</span>
     <div className="flex items-center gap-2">
       {isConnected ? (
         <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
       ) : (
         <WifiOff className="w-3 h-3 text-red-500" />
       )}
-      <span className="text-xs text-gray-600">{time}</span>
+      <span className="text-xs text-gray-600 font-medium">{time}</span>
     </div>
   </div>
 )
@@ -253,7 +258,7 @@ const BottomNavigation = () => {
               }`}
             >
               <Icon className="w-5 h-5 mb-1" />
-              <span className="text-xs font-semibold">{tab.label}</span>
+              <span className="text-[10px] font-bold uppercase">{tab.label}</span>
             </Link>
           )
         })}
@@ -270,22 +275,22 @@ const SensorCard: React.FC<SensorCardProps> = ({ icon: Icon, title, value, unit,
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={`p-2.5 rounded-lg ${color}`}>
+          <div className={`p-2 rounded-lg ${color}`}>
             <Icon className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-semibold text-gray-700">{title}</span>
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">{title}</span>
         </div>
         <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(status)} animate-pulse`}></div>
       </div>
       <div className="mb-3">
-        <div className="text-2xl font-bold text-gray-900">
+        <div className="text-2xl font-black text-gray-900">
           {value.toFixed(1)}
-          <span className="text-xs text-gray-500 ml-1 font-normal">{unit}</span>
+          <span className="text-xs text-gray-400 ml-1 font-bold">{unit}</span>
         </div>
       </div>
-      <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
         <div 
-          className={`h-full transition-all ${getStatusColor(status)}`} 
+          className={`h-full transition-all duration-500 ${getStatusColor(status)}`} 
           style={{ width: `${Math.min(100, Math.max(0, percentage))}%` }}
         ></div>
       </div>
@@ -294,28 +299,26 @@ const SensorCard: React.FC<SensorCardProps> = ({ icon: Icon, title, value, unit,
 }
 
 const ControlToggle: React.FC<ControlToggleProps> = ({ label, icon: Icon, active, onChange }) => (
-  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
     <div className="flex items-center gap-3">
-      <div className={`p-2 rounded-lg ${active ? 'bg-emerald-100' : 'bg-gray-200'}`}>
-        <Icon className={`w-5 h-5 ${active ? 'text-emerald-600' : 'text-gray-400'}`} />
+      <div className={`p-2.5 rounded-xl ${active ? 'bg-emerald-500 text-white' : 'bg-gray-200 text-gray-400'}`}>
+        <Icon className="w-5 h-5" />
       </div>
-      <span className="font-medium text-gray-900">{label}</span>
+      <span className="font-bold text-gray-700 text-sm">{label}</span>
     </div>
     <button 
       onClick={() => onChange(!active)} 
-      className={`w-12 h-6 rounded-full transition-colors ${active ? 'bg-emerald-500' : 'bg-gray-300'}`}
+      className={`w-12 h-7 rounded-full transition-all relative ${active ? 'bg-emerald-500 shadow-inner' : 'bg-gray-300'}`}
     >
-      <div className={`w-5 h-5 bg-white rounded-full transition-transform ${active ? 'translate-x-6' : 'translate-x-0.5'}`} />
+      <div className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-all ${active ? 'right-1' : 'left-1'}`} />
     </button>
   </div>
 )
 
 // --- MAIN DASHBOARD COMPONENT ---
 export default function Dashboard() {
-  // Hooks
   const { controls, quickSaveControls, thresholds } = useAquaponicsSettings()
   
-  // State
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [expandedAlert, setExpandedAlert] = useState<number | null>(null)
   const [showControlsModal, setShowControlsModal] = useState<boolean>(false)
@@ -329,7 +332,6 @@ export default function Dashboard() {
   
   const LIVE_STREAM_URL = "http://192.168.210.142:8000/video_feed"
 
-  // Calculate overall system status
   const overallSeverity = alerts.reduce((maxSeverity, alert) => {
     if (alert.severity === 'high') return 'high'
     if (alert.severity === 'medium' && maxSeverity !== 'high') return 'medium'
@@ -344,575 +346,248 @@ export default function Dashboard() {
 
   const status = getOverallStatus(overallSeverity)
 
-  // Sync local controls with global controls
   useEffect(() => {
     if (showControlsModal) setLocalControls({ ...controls })
   }, [showControlsModal, controls])
 
   useEffect(() => {
-  const checkCameraConnection = () => {
-    const img = new Image()
-    
-    img.onload = () => {
-      setIsCameraConnected(true)
-      setCameraLoading(false)
+    const checkCameraConnection = () => {
+      const img = new Image()
+      img.onload = () => { setIsCameraConnected(true); setCameraLoading(false); }
+      img.onerror = () => { setIsCameraConnected(false); setCameraLoading(false); }
+      img.src = `${LIVE_STREAM_URL}?t=${Date.now()}`
     }
-    
-    img.onerror = () => {
-      setIsCameraConnected(false)
-      setCameraLoading(false)
-    }
-    
-    // Add timestamp to prevent caching
-    img.src = `${LIVE_STREAM_URL}?t=${Date.now()}`
-  }
+    checkCameraConnection()
+    const cameraCheckInterval = setInterval(checkCameraConnection, 10000)
+    return () => clearInterval(cameraCheckInterval)
+  }, [])
 
-  // Check immediately on mount
-  checkCameraConnection()
-  
-  // Re-check every 10 seconds
-  const cameraCheckInterval = setInterval(checkCameraConnection, 10000)
-
-  return () => clearInterval(cameraCheckInterval)
-}, [])
-
-  // Fetch sensor data from API
   useEffect(() => {
     const fetchSensorData = async () => {
       try {
-        // Use Next.js API route (internal endpoint)
-        const API_URL = "/api/sensors"
-        
-        const response = await fetch(API_URL)
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
+        const response = await fetch("/api/sensors")
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
         
         const apiResponse = await response.json()
-        
         if (apiResponse.status === "success" && apiResponse.data) {
           setSensorData(apiResponse.data)
           setAlerts(generateAlerts(apiResponse.data, thresholds))
           setIsRaspiConnected(true)
-          
-          // Optional: log raw data for debugging
-          console.log("✅ Sensor data updated:", apiResponse.data)
-          if (apiResponse.rawData) {
-            console.log("📡 Raw Raspberry Pi data:", apiResponse.rawData)
-          }
         } else {
-          console.error("API returned error:", apiResponse.message)
           setIsRaspiConnected(false)
         }
-
       } catch (error) {
         console.error("❌ Failed to fetch sensor data:", error)
         setIsRaspiConnected(false)
-        // Dashboard continues showing last known values
       }
-      
       setCurrentTime(new Date())
     }
 
-    // Fetch immediately on mount
     fetchSensorData()
-    
-    // Then fetch every 3 seconds
     const interval = setInterval(fetchSensorData, 3000)
-
     return () => clearInterval(interval)
   }, [thresholds])
 
-  // Handle control save
   const handleQuickControlsSave = async () => {
     try {
-      const API_URL = "/api/controls"
-
-      const response = await fetch(API_URL, {
+      const response = await fetch("/api/controls", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(localControls),
       })
-
-      if (!response.ok) {
-        throw new Error(`Failed to update controls: ${response.status}`)
-      }
-
+      if (!response.ok) throw new Error(`Failed to update controls: ${response.status}`)
+      
       quickSaveControls({ ...localControls })
-      alert("✅ Controls successfully saved to system.")
       setShowControlsModal(false)
-
     } catch (error) {
       console.error("Error saving controls:", error)
-      alert("❌ Failed to connect to the system. Check Raspberry Pi connection.")
+      alert("❌ Failed to connect to the system.")
     }
   }
-  // Controls Modal Component
-  const ControlsModal = () => {
-    const handleLocalControlChange = (key: keyof ControlState, val: boolean) => 
-      setLocalControls(prev => ({ ...prev, [key]: val }))
-    
-    return (
-      <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
-        <div className="w-full bg-white rounded-t-3xl p-6 max-w-md mx-auto max-h-[80vh] overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Quick Controls</h2>
-            <button 
-              onClick={() => setShowControlsModal(false)} 
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          <div className="space-y-3">
-            <ControlToggle 
-              label="Submersible Pump" 
-              icon={Waves} 
-              active={localControls.pump} 
-              onChange={val => handleLocalControlChange('pump', val)} 
-            />
-            <ControlToggle 
-              label="DC Fan" 
-              icon={Wind} 
-              active={localControls.fan} 
-              onChange={val => handleLocalControlChange('fan', val)} 
-            />
-            <ControlToggle 
-              label="pH Adjustment" 
-              icon={Droplets} 
-              active={localControls.phAdjustment} 
-              onChange={val => handleLocalControlChange('phAdjustment', val)} 
-            />
-            <ControlToggle 
-              label="Aerator" 
-              icon={Activity} 
-              active={localControls.aerator} 
-              onChange={val => handleLocalControlChange('aerator', val)} 
-            />
-            <ControlToggle 
-              label="Grow Light" 
-              icon={Sun} 
-              active={localControls.growLight} 
-              onChange={val => handleLocalControlChange('growLight', val)} 
-            />
-          </div>
-          <button 
-            onClick={handleQuickControlsSave} 
-            className="w-full mt-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors"
-          >
-            Save Controls
-          </button>
-        </div>
-      </div>
-    )
-  }
 
-  // Camera Modal Component  
-  const CameraModal = ({ 
-    isConnected, 
-    streamUrl, 
-    onClose 
-  }: { 
-    isConnected: boolean; 
-    streamUrl: string; 
-    onClose: () => void 
-  }) => {
-    const [modalStreamError, setModalStreamError] = useState(false)
-    const [modalStreamLoading, setModalStreamLoading] = useState(true)
-
-    const handleStreamLoad = () => {
-      setModalStreamLoading(false)
-      setModalStreamError(false)
-    }
-
-    const handleStreamError = () => {
-      setModalStreamLoading(false)
-      setModalStreamError(true)
-    }
-
-    return (
-      <div className="fixed inset-0 bg-black z-50 flex flex-col">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <Camera className="w-5 h-5 text-emerald-400" />
-            <div>
-              <h2 className="text-white font-bold">Live Camera Feed</h2>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <div className={`w-2 h-2 rounded-full ${
-                  isConnected && !modalStreamError ? 'bg-green-500 animate-pulse' : 'bg-red-500'
-                }`}></div>
-                {isConnected && !modalStreamError ? 'Connected' : 'Disconnected'}
-              </div>
-            </div>
-          </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
-        </div>
-
-        {/* Stream Container */}
-        <div className="flex-1 bg-gray-900 flex items-center justify-center relative">
-          {/* Loading State */}
-          {modalStreamLoading && (
-            <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-10">
-              <div className="text-center text-white">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
-                <div className="text-lg font-semibold">Connecting to camera...</div>
-              </div>
-            </div>
-          )}
-
-          {/* Live Stream */}
-          {isConnected && !modalStreamError ? (
-            <img
-              src={streamUrl}
-              alt="Live Aquaponics Camera Feed"
-              className="w-full h-full object-contain"
-              onLoad={handleStreamLoad}
-              onError={handleStreamError}
-            />
-          ) : (
-          /* Disconnected State */
-          <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 to-orange-900/30 flex items-center justify-center">
-            <div className="text-center text-white p-6">
-              <Camera className="w-20 h-20 mx-auto mb-4 opacity-50" />
-              <div className="text-2xl font-semibold mb-2">Camera Stream Unavailable</div>
-              <div className="text-sm opacity-70 mb-4">
-                {modalStreamError ? 'Failed to load stream' : 'Camera is offline'}
-              </div>
-              <div className="text-xs opacity-50 font-mono bg-black/30 px-3 py-2 rounded">
-                {streamUrl}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Stream Overlay Info */}
-        {isConnected && !modalStreamError && !modalStreamLoading && (
-          <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 rounded-lg text-white backdrop-blur-sm">
-            <div className="text-sm font-semibold font-mono">
-              {new Date().toLocaleTimeString()}
-            </div>
-            <div className="text-xs text-gray-300">
-              1080p • 30fps • Live
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modal Footer with Actions */}
-      <div className="p-4 bg-black/80 backdrop-blur-sm border-t border-white/10">
-        <div className="flex items-center justify-between max-w-md mx-auto">
-          <button 
-            onClick={onClose}
-            className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-semibold"
-          >
-            Close
-          </button>
-          <Link 
-            href="/camera"
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-semibold"
-          >
-            Open Full Camera App →
-          </Link>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-  // Main Render
   return (
-    <div className="min-h-screen bg-gray-50 max-w-md mx-auto">
+    <div className="min-h-screen bg-[#F9FAFB] max-w-md mx-auto relative shadow-2xl overflow-x-hidden">
       <Navbar time={currentTime.toLocaleTimeString()} isConnected={isRaspiConnected} />
       
-      <div className="space-y-5 pb-24 px-4 py-5">
-        {/* System Header */}
-        <div className="bg-gradient-to-br from-emerald-600 to-teal-600 rounded-2xl p-6 text-white shadow-lg">
-          <div className="flex items-start justify-between mb-4">
+      <div className="space-y-6 pb-28 px-4 py-6">
+        {/* Header Hero */}
+        <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 text-white shadow-xl shadow-emerald-100">
+          <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-bold">GROWUP</h1>
-              <p className="text-emerald-100 text-sm">Aquaponics Tower System</p>
+              <h1 className="text-3xl font-black tracking-tighter italic">GROWUP</h1>
+              <p className="text-emerald-100 text-xs font-bold uppercase tracking-widest opacity-80">Aquaponics Tower</p>
             </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold">{currentTime.toLocaleTimeString()}</div>
-              <div className="text-xs text-emerald-100 flex items-center justify-end gap-1 mt-1">
-                <div className="w-2 h-2 bg-emerald-300 rounded-full animate-pulse"></div>
-                Live
-              </div>
+            <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md">
+              <Activity className="w-6 h-6" />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div className="bg-white/20 rounded-lg p-2">
-              <div className="text-xs text-emerald-100">Plants</div>
-              <div className="text-xl font-bold">4</div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/10 rounded-2xl p-3 border border-white/10 text-center">
+              <div className="text-[10px] font-bold text-emerald-200 uppercase mb-1">Plants</div>
+              <div className="text-xl font-black tracking-tight">4</div>
             </div>
-            <div className="bg-white/20 rounded-lg p-2">
-              <div className="text-xs text-emerald-100">Health</div>
-              <div className="text-xl font-bold">94%</div>
+            <div className="bg-white/10 rounded-2xl p-3 border border-white/10 text-center">
+              <div className="text-[10px] font-bold text-emerald-200 uppercase mb-1">Health</div>
+              <div className="text-xl font-black tracking-tight">94%</div>
             </div>
-            <div className="bg-white/20 rounded-lg p-2">
-              <div className="text-xs text-emerald-100">Uptime</div>
-              <div className="text-xl font-bold">99.8%</div>
+            <div className="bg-white/10 rounded-2xl p-3 border border-white/10 text-center">
+              <div className="text-[10px] font-bold text-emerald-200 uppercase mb-1">Status</div>
+              <div className="text-xl font-black tracking-tight">LIVE</div>
             </div>
           </div>
         </div>
 
-        {/* System Status & Controls */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+        {/* System Health Summary */}
+        <div className="bg-white rounded-[2rem] p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 ${status.color} rounded-full animate-pulse`}></div>
+            <div className="flex items-center gap-4">
+              <div className={`w-3 h-3 ${status.color} rounded-full animate-pulse shadow-lg`} />
               <div>
-                <div className="font-semibold text-gray-900">{status.text}</div>
-                <div className="text-xs text-gray-500">
-                  {isRaspiConnected ? "All sensors operational" : "Connection lost"}
+                <div className="font-black text-gray-800 tracking-tight">{status.text}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  {isRaspiConnected ? "Sensors Online" : "Communication Lost"}
                 </div>
               </div>
             </div>
             <button 
               onClick={() => setShowControlsModal(true)} 
-              className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition-colors"
+              className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-black uppercase tracking-tight active:scale-95 transition-all"
             >
               Controls
             </button>
           </div>
         </div>
 
-        {/* Camera Feed */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
-          <div 
-            className="bg-gray-900 aspect-video relative overflow-hidden group cursor-pointer" 
-            onClick={() => setShowCameraModal(true)}
-          >
-            {/* Loading State */}
-            {cameraLoading && (
-              <div className="absolute inset-0 bg-gray-900 flex items-center justify-center z-10">
-                <div className="text-center text-white">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mx-auto mb-2"></div>
-                  <div className="text-xs">Connecting to camera...</div>
+        {/* Live Camera Feed Section */}
+        <section className="space-y-3">
+          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest px-1">Monitoring Feed</h2>
+          <div className="bg-gray-900 rounded-[2.5rem] overflow-hidden shadow-lg border-4 border-white relative group">
+            <div className="aspect-video relative cursor-pointer" onClick={() => setShowCameraModal(true)}>
+              {cameraLoading ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500" />
                 </div>
-              </div>
-            )}
-
-            {/* Connected Stream */}
-            {!cameraLoading && isCameraConnected ? (
-              <>
-                <img
-                  src={LIVE_STREAM_URL}
-                  alt="Live Preview"
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                  style={{ filter: 'brightness(0.85)' }}
-                />
-                {/* Live Indicator */}
-                <div className="absolute top-3 left-3 flex items-center gap-2 bg-red-500/90 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                  <span className="text-white text-xs font-bold">LIVE</span>
+              ) : isCameraConnected ? (
+                <img src={LIVE_STREAM_URL} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Live" />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+                  <Camera size={32} className="opacity-20 mb-2" />
+                  <span className="text-[10px] font-bold uppercase">Signal Lost</span>
                 </div>
-              </>
-            ) : !cameraLoading && !isCameraConnected ? (
-              /* Disconnected State */
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-                <div className="text-center text-white p-4">
-                  <Camera className="w-12 h-12 mx-auto mb-3 opacity-40" />
-                  <div className="text-sm font-semibold mb-1">Camera Offline</div>
-                  <div className="text-xs text-gray-400">Check Raspberry Pi connection</div>
-                </div>
+              )}
+              
+              <div className="absolute top-4 left-4 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded flex items-center gap-1 shadow-lg">
+                <div className="w-1 h-1 bg-white rounded-full animate-ping" /> LIVE
               </div>
-            ) : null}
-
-            {/* Timestamp Overlay */}
-            <div className="absolute bottom-3 left-3 bg-black/70 px-2.5 py-1.5 rounded-lg text-white text-xs font-mono backdrop-blur-sm">
-              {currentTime.toLocaleTimeString()}
-            </div>
-
-            {/* Fullscreen Button (shows on hover) */}
-            <button 
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowCameraModal(true)
-              }} 
-              className="absolute bottom-3 right-3 bg-emerald-600 hover:bg-emerald-700 text-white p-2.5 rounded-lg transition-all opacity-0 group-hover:opacity-100 shadow-lg"
-            >
-              <Maximize2 className="w-4 h-4" />
-            </button>
-
-            {/* Connection Status Indicator */}
-            <div className={`absolute top-3 right-3 w-2.5 h-2.5 rounded-full shadow-lg ${
-              isCameraConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
-            }`}></div>
-          </div>
-
-          {/* Camera Info Footer */}
-          <div className="p-3 bg-gray-50 border-t border-gray-100">
-            <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2">
-                <Camera className="w-3.5 h-3.5 text-gray-500" />
-                <span className="text-gray-600 font-medium">
-                  {isCameraConnected ? 'Live Tower Feed' : 'Camera Disconnected'}
-                </span>
+              
+              <div className="absolute bottom-4 left-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-mono">
+                {currentTime.toLocaleTimeString()}
               </div>
-              <Link 
-                href="/camera" 
-                className="text-emerald-600 hover:text-emerald-700 font-semibold"
-              >
-                View Full →
-              </Link>
+
+              <button className="absolute bottom-4 right-4 bg-emerald-500 text-white p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <Maximize2 size={14} />
+              </button>
             </div>
           </div>
-        </div>
+        </section>
 
         {/* Alerts & Notifications */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-amber-500" />
-              Alerts & Notifications
+        <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-5 border-b border-gray-50 flex items-center justify-between">
+            <h3 className="font-black text-gray-800 text-sm flex items-center gap-2 uppercase tracking-tight">
+              <Bell className="w-4 h-4 text-amber-500" /> Notifications
             </h3>
-            <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-semibold">
-              {alerts.length}
+            <span className="text-[10px] font-black bg-amber-100 text-amber-600 px-2 py-0.5 rounded-full">
+              {alerts.length} NEW
             </span>
           </div>
-          <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
+          <div className="divide-y divide-gray-50 max-h-48 overflow-y-auto px-2">
             {alerts.map((alert) => (
               <div 
                 key={alert.id} 
-                className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                  expandedAlert === alert.id ? "bg-gray-50" : ""
-                }`} 
+                className={`p-4 transition-all rounded-2xl mb-1 ${expandedAlert === alert.id ? "bg-gray-50" : "bg-white"}`} 
                 onClick={() => setExpandedAlert(expandedAlert === alert.id ? null : alert.id)}
               >
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg flex-shrink-0 ${
-                    alert.severity === "high" ? "bg-red-100" : 
-                    alert.severity === "medium" ? "bg-amber-100" : "bg-emerald-100"
+                <div className="flex items-start gap-4">
+                  <div className={`p-2 rounded-xl flex-shrink-0 ${
+                    alert.severity === "high" ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
                   }`}>
-                    {alert.type === "warning" ? (
-                      <AlertTriangle className={`w-4 h-4 ${
-                        alert.severity === "high" ? "text-red-600" : "text-amber-600"
-                      }`} />
-                    ) : alert.severity === "low" && alert.title.includes("Maintenance") ? (
-                      <Clock className="w-4 h-4 text-blue-600" />
-                    ) : (
-                      <CheckCircle className="w-4 h-4 text-emerald-600" />
-                    )}
+                    {alert.type === "warning" ? <AlertTriangle size={16} /> : <CheckCircle size={16} />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-900 text-sm">{alert.title}</div>
+                    <div className="font-bold text-gray-800 text-xs leading-tight">{alert.title}</div>
+                    <div className="text-[10px] text-gray-400 mt-1 font-bold">{alert.time}</div>
                     {expandedAlert === alert.id && (
-                      <div className="text-xs text-gray-600 mt-2">{alert.message}</div>
+                      <div className="text-[11px] text-gray-500 mt-2 leading-relaxed font-medium animate-in fade-in slide-in-from-top-1">
+                        {alert.message}
+                      </div>
                     )}
-                    <div className="text-xs text-gray-500 mt-1">{alert.time}</div>
                   </div>
-                  <ChevronDown className={`w-4 h-4 text-gray-400 flex-shrink-0 transition-transform ${
-                    expandedAlert === alert.id ? "rotate-180" : ""
-                  }`} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Critical Metrics */}
-        <div>
-          <h2 className="text-sm font-bold text-gray-900 mb-3 px-1">Critical Metrics</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <SensorCard 
-              icon={Thermometer} 
-              title="Water Temp" 
-              value={sensorData.waterTemp} 
-              unit="°C" 
-              min={20} 
-              max={26} 
-              color="bg-blue-500" 
-            />
-            <SensorCard 
-              icon={Droplets} 
-              title="pH Level" 
-              value={sensorData.ph} 
-              unit="" 
-              min={6.5} 
-              max={7.5} 
-              color="bg-purple-500" 
-            />
+        {/* Metrics Sections */}
+        <section>
+          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest px-1 mb-4">Critical Metrics</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <SensorCard icon={Thermometer} title="Water Temp" value={sensorData.waterTemp} unit="°C" min={20} max={26} color="bg-blue-500" />
+            <SensorCard icon={Droplets} title="pH Level" value={sensorData.ph} unit="pH" min={6.5} max={7.5} color="bg-purple-500" />
           </div>
-        </div>
+        </section>
 
-        {/* System Metrics */}
-        <div>
-          <h2 className="text-sm font-bold text-gray-900 mb-3 px-1">System Metrics</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <SensorCard 
-              icon={Waves} 
-              title="Water Level" 
-              value={Math.round(sensorData.waterLevel)} 
-              unit="%" 
-              min={70} 
-              max={100} 
-              color="bg-cyan-500" 
-            />
-            <SensorCard 
-              icon={Gauge} 
-              title="Flow Rate" 
-              value={sensorData.waterFlow} 
-              unit="L/min" 
-              min={3} 
-              max={6} 
-              color="bg-indigo-500" 
-            />
-            <SensorCard 
-              icon={Zap} 
-              title="Light Level" 
-              value={sensorData.lightIntensity} 
-              unit="lux" 
-              min={10000} 
-              max={20000} 
-              color="bg-yellow-500" 
-            />
-            <SensorCard 
-              icon={Wind} 
-              title="Humidity" 
-              value={sensorData.humidity} 
-              unit="%" 
-              min={50} 
-              max={80} 
-              color="bg-sky-500" 
-            />
-            <SensorCard 
-              icon={Gauge} 
-              title="Air Pressure" 
-              value={sensorData.airPressure} 
-              unit="hPa" 
-              min={990} 
-              max={1030} 
-              color="bg-red-500" 
-            />
-            <SensorCard 
-              icon={Thermometer} 
-              title="Air Temp" 
-              value={sensorData.airTemp} 
-              unit="°C" 
-              min={20} 
-              max={30} 
-              color="bg-orange-500" 
-            />
+        <section>
+          <h2 className="text-xs font-black text-gray-400 uppercase tracking-widest px-1 mb-4">Tower Systems</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <SensorCard icon={Waves} title="Water Level" value={sensorData.waterLevel} unit="%" min={70} max={100} color="bg-cyan-500" />
+            <SensorCard icon={Gauge} title="Flow Rate" value={sensorData.waterFlow} unit="L/m" min={3} max={6} color="bg-indigo-500" />
+            <SensorCard icon={Zap} title="Grow Lights" value={sensorData.lightIntensity} unit="lux" min={10000} max={20000} color="bg-amber-500" />
+            <SensorCard icon={Wind} title="Humidity" value={sensorData.humidity} unit="%" min={50} max={80} color="bg-sky-500" />
           </div>
-        </div>
+        </section>
       </div>
 
       <BottomNavigation />
-      {showControlsModal && <ControlsModal />}
+
+      {/* MODALS */}
+      {showControlsModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end justify-center px-4 pb-4">
+          <div className="w-full bg-white rounded-[3rem] p-8 max-w-sm animate-in slide-in-from-bottom duration-300">
+            <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-8" />
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-black text-gray-800 tracking-tighter">Quick Controls</h2>
+              <button onClick={() => setShowControlsModal(false)} className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <ControlToggle label="Water Pump" icon={Waves} active={localControls.pump} onChange={v => setLocalControls(p => ({...p, pump: v}))} />
+              <ControlToggle label="Ventilation Fan" icon={Wind} active={localControls.fan} onChange={v => setLocalControls(p => ({...p, fan: v}))} />
+              <ControlToggle label="pH Balancer" icon={Droplets} active={localControls.phAdjustment} onChange={v => setLocalControls(p => ({...p, phAdjustment: v}))} />
+              <ControlToggle label="UV Grow Light" icon={Sun} active={localControls.growLight} onChange={v => setLocalControls(p => ({...p, growLight: v}))} />
+              <ControlToggle label="Aerator" icon={Activity} active={localControls.aerator} onChange={v => setLocalControls(p => ({...p, aerator: v}))} />
+            </div>
+            <button onClick={handleQuickControlsSave} className="w-full mt-8 py-5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-[2rem] shadow-xl shadow-emerald-100 transition-all active:scale-95 uppercase tracking-widest text-sm">
+              Apply Changes
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Camera Modal Placeholder */}
       {showCameraModal && (
-        <CameraModal
-          isConnected={isCameraConnected}
-          streamUrl={LIVE_STREAM_URL}
-          onClose={() => setShowCameraModal(false)}
-        />
+        <div className="fixed inset-0 bg-black z-[60] flex flex-col items-center justify-center">
+          <button onClick={() => setShowCameraModal(false)} className="absolute top-10 right-10 text-white bg-white/20 p-3 rounded-full backdrop-blur-md">
+            <X size={24} />
+          </button>
+          <img src={LIVE_STREAM_URL} className="w-full h-auto" alt="Fullscreen Feed" />
+          <div className="mt-6 text-white text-center">
+            <p className="font-black text-xl tracking-tight">TOWER FEED 01</p>
+            <p className="text-xs text-gray-400 font-bold uppercase mt-1">1080p Resolution • 30 FPS</p>
+          </div>
+        </div>
       )}
     </div>
   )
