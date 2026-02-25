@@ -40,6 +40,13 @@ interface CameraModalProps {
   isConnected: boolean; streamUrl: string; onClose: () => void;
 }
 
+// NEW: System stats interface
+interface SystemStatsState {
+  plantCount: number;
+  healthPercent: number;
+  uptimePercent: number;
+}
+
 // --- CONSTANTS ---
 const INITIAL_CONTROLS_FULL: SystemControls = {
   pump: true, fan: false, phAdjustment: true, aerator: true, growLight: true,
@@ -51,6 +58,11 @@ const INITIAL_THRESHOLDS: ThresholdState = {
 const INITIAL_SENSOR_DATA: SensorDataState = {
   waterTemp: 23.2, ph: 6.8, waterLevel: 85, waterFlow: 4.5,
   humidity: 65, lightIntensity: 15000, airTemp: 25.5, airPressure: 1012.0,
+}
+const INITIAL_SYSTEM_STATS: SystemStatsState = {
+  plantCount: 4,
+  healthPercent: 94,
+  uptimePercent: 99.8,
 }
 const localStorageKey = 'aquaponics_settings_state'
 
@@ -99,9 +111,7 @@ const useAquaponicsSettings = () => {
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === localStorageKey && e.newValue) {
-        setState(JSON.parse(e.newValue))
-      }
+      if (e.key === localStorageKey && e.newValue) setState(JSON.parse(e.newValue))
     }
     window.addEventListener('storage', handleStorageChange)
     return () => window.removeEventListener('storage', handleStorageChange)
@@ -115,12 +125,7 @@ const useAquaponicsSettings = () => {
     })
   }
 
-  return {
-    controls: state.controls,
-    quickSaveControls,
-    activePreset: state.activePreset,
-    thresholds: state.thresholds,
-  }
+  return { controls: state.controls, quickSaveControls, activePreset: state.activePreset, thresholds: state.thresholds }
 }
 
 // --- ALERT GENERATION ---
@@ -171,16 +176,11 @@ const generateAlerts = (data: SensorDataState, thresholds: ThresholdState): Aler
 }
 
 // --- UI COMPONENTS ---
-
 const Navbar: React.FC<{ time: string; isConnected: boolean }> = ({ time, isConnected }) => (
   <div className="bg-white px-4 py-2.5 flex items-center justify-between text-sm border-b border-gray-100 sticky top-0 z-40">
     <span className="font-bold text-gray-900">GROWUP</span>
     <div className="flex items-center gap-2">
-      {isConnected ? (
-        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-      ) : (
-        <WifiOff className="w-3 h-3 text-red-500" />
-      )}
+      {isConnected ? <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> : <WifiOff className="w-3 h-3 text-red-500" />}
       <span className="text-xs text-gray-600">{time}</span>
     </div>
   </div>
@@ -226,17 +226,14 @@ const SensorCard: React.FC<SensorCardProps> = ({ icon: Icon, title, value, unit,
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={`p-2.5 rounded-lg ${color}`}>
-            <Icon className="w-4 h-4 text-white" />
-          </div>
+          <div className={`p-2.5 rounded-lg ${color}`}><Icon className="w-4 h-4 text-white" /></div>
           <span className="text-sm font-semibold text-gray-700">{title}</span>
         </div>
         <div className={`w-2.5 h-2.5 rounded-full ${getStatusColor(status)} animate-pulse`}></div>
       </div>
       <div className="mb-3">
         <div className="text-2xl font-bold text-gray-900">
-          {value.toFixed(1)}
-          <span className="text-xs text-gray-500 ml-1 font-normal">{unit}</span>
+          {value.toFixed(1)}<span className="text-xs text-gray-500 ml-1 font-normal">{unit}</span>
         </div>
       </div>
       <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
@@ -262,16 +259,13 @@ const ControlToggle: React.FC<ControlToggleProps> = ({ label, icon: Icon, active
   </div>
 )
 
-// --- MODALS (defined OUTSIDE Dashboard) ---
-
+// --- MODALS ---
 const ControlsModal: React.FC<ControlsModalProps> = ({ localControls, onControlChange, onSave, onClose }) => (
   <div className="fixed inset-0 bg-black/50 z-50 flex items-end">
     <div className="w-full bg-white rounded-t-3xl p-6 max-w-md mx-auto max-h-[80vh] overflow-y-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Quick Controls</h2>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <X className="w-6 h-6" />
-        </button>
+        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors"><X className="w-6 h-6" /></button>
       </div>
       <div className="space-y-3">
         <ControlToggle label="Submersible Pump" icon={Waves}    active={localControls.pump}          onChange={val => onControlChange('pump', val)} />
@@ -280,8 +274,7 @@ const ControlsModal: React.FC<ControlsModalProps> = ({ localControls, onControlC
         <ControlToggle label="Aerator"           icon={Activity} active={localControls.aerator}      onChange={val => onControlChange('aerator', val)} />
         <ControlToggle label="Grow Light"        icon={Sun}      active={localControls.growLight}    onChange={val => onControlChange('growLight', val)} />
       </div>
-      <button onClick={onSave}
-        className="w-full mt-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors">
+      <button onClick={onSave} className="w-full mt-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors">
         Save Controls
       </button>
     </div>
@@ -291,7 +284,6 @@ const ControlsModal: React.FC<ControlsModalProps> = ({ localControls, onControlC
 const CameraModal: React.FC<CameraModalProps> = ({ isConnected, streamUrl, onClose }) => {
   const [modalStreamError, setModalStreamError] = useState(false)
   const [modalStreamLoading, setModalStreamLoading] = useState(true)
-
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col">
       <div className="flex items-center justify-between p-4 bg-black/80 backdrop-blur-sm border-b border-white/10">
@@ -309,7 +301,6 @@ const CameraModal: React.FC<CameraModalProps> = ({ isConnected, streamUrl, onClo
           <X className="w-6 h-6 text-white" />
         </button>
       </div>
-
       <div className="flex-1 bg-gray-900 flex items-center justify-center relative">
         {modalStreamLoading && (
           <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-10">
@@ -319,12 +310,10 @@ const CameraModal: React.FC<CameraModalProps> = ({ isConnected, streamUrl, onClo
             </div>
           </div>
         )}
-
         {isConnected && !modalStreamError ? (
           <img src={streamUrl} alt="Live Aquaponics Camera Feed" className="w-full h-full object-contain"
             onLoad={() => { setModalStreamLoading(false); setModalStreamError(false) }}
-            onError={() => { setModalStreamLoading(false); setModalStreamError(true) }}
-          />
+            onError={() => { setModalStreamLoading(false); setModalStreamError(true) }} />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-red-900/30 to-orange-900/30 flex items-center justify-center">
             <div className="text-center text-white p-6">
@@ -335,7 +324,6 @@ const CameraModal: React.FC<CameraModalProps> = ({ isConnected, streamUrl, onClo
             </div>
           </div>
         )}
-
         {isConnected && !modalStreamError && !modalStreamLoading && (
           <div className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 rounded-lg text-white backdrop-blur-sm">
             <div className="text-sm font-semibold font-mono">{new Date().toLocaleTimeString()}</div>
@@ -343,15 +331,10 @@ const CameraModal: React.FC<CameraModalProps> = ({ isConnected, streamUrl, onClo
           </div>
         )}
       </div>
-
       <div className="p-4 bg-black/80 backdrop-blur-sm border-t border-white/10">
         <div className="flex items-center justify-between max-w-md mx-auto">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-semibold">
-            Close
-          </button>
-          <Link href="/camera" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-semibold">
-            Open Full Camera App →
-          </Link>
+          <button onClick={onClose} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors text-sm font-semibold">Close</button>
+          <Link href="/camera" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors text-sm font-semibold">Open Full Camera App →</Link>
         </div>
       </div>
     </div>
@@ -373,6 +356,9 @@ export default function Dashboard() {
   const [cameraLoading, setCameraLoading] = useState(true)
   const [isRaspiConnected, setIsRaspiConnected] = useState(true)
 
+  // NEW: Real system stats state
+  const [systemStats, setSystemStats] = useState<SystemStatsState>(INITIAL_SYSTEM_STATS)
+
   const LIVE_STREAM_URL = "http://192.168.210.142:8000/video_feed"
 
   const overallSeverity = alerts.reduce((maxSeverity, alert) => {
@@ -389,7 +375,6 @@ export default function Dashboard() {
 
   const status = getOverallStatus(overallSeverity)
 
-  // Sync local controls when modal opens
   useEffect(() => {
     if (showControlsModal) setLocalControls({ ...controls })
   }, [showControlsModal, controls])
@@ -424,9 +409,7 @@ export default function Dashboard() {
           setSensorData(apiResponse.data)
           setAlerts(generateAlerts(apiResponse.data, thresholds))
           setIsRaspiConnected(true)
-          console.log("✅ Sensor data updated:", apiResponse.data)
         } else {
-          console.error("API returned error:", apiResponse.message)
           setIsRaspiConnected(false)
         }
       } catch (error) {
@@ -438,6 +421,27 @@ export default function Dashboard() {
     const interval = setInterval(fetchSensorData, 3000)
     return () => clearInterval(interval)
   }, [thresholds])
+
+  // NEW: System stats fetch — polls every 30 seconds (changes slowly)
+  useEffect(() => {
+    const fetchSystemStats = async () => {
+      try {
+        const response = await fetch("/api/system-stats")
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
+        const apiResponse = await response.json()
+        if (apiResponse.status === "success" && apiResponse.data) {
+          setSystemStats(apiResponse.data)
+          console.log("✅ System stats updated:", apiResponse.data)
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch system stats:", error)
+        // Falls back to INITIAL_SYSTEM_STATS — no UI disruption
+      }
+    }
+    fetchSystemStats()
+    const interval = setInterval(fetchSystemStats, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleLocalControlChange = (key: keyof ControlState, val: boolean) =>
     setLocalControls(prev => ({ ...prev, [key]: val }))
@@ -479,18 +483,19 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          {/* NEW: Real system stats */}
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="bg-white/20 rounded-lg p-2">
               <div className="text-xs text-emerald-100">Plants</div>
-              <div className="text-xl font-bold">4</div>
+              <div className="text-xl font-bold">{systemStats.plantCount}</div>
             </div>
             <div className="bg-white/20 rounded-lg p-2">
               <div className="text-xs text-emerald-100">Health</div>
-              <div className="text-xl font-bold">94%</div>
+              <div className="text-xl font-bold">{systemStats.healthPercent}%</div>
             </div>
             <div className="bg-white/20 rounded-lg p-2">
               <div className="text-xs text-emerald-100">Uptime</div>
-              <div className="text-xl font-bold">99.8%</div>
+              <div className="text-xl font-bold">{systemStats.uptimePercent}%</div>
             </div>
           </div>
         </div>
@@ -502,9 +507,7 @@ export default function Dashboard() {
               <div className={`w-3 h-3 ${status.color} rounded-full animate-pulse`}></div>
               <div>
                 <div className="font-semibold text-gray-900">{status.text}</div>
-                <div className="text-xs text-gray-500">
-                  {isRaspiConnected ? "All sensors operational" : "Connection lost"}
-                </div>
+                <div className="text-xs text-gray-500">{isRaspiConnected ? "All sensors operational" : "Connection lost"}</div>
               </div>
             </div>
             <button onClick={() => setShowControlsModal(true)}
@@ -525,7 +528,6 @@ export default function Dashboard() {
                 </div>
               </div>
             )}
-
             {!cameraLoading && isCameraConnected ? (
               <>
                 <img src={LIVE_STREAM_URL} alt="Live Preview"
@@ -545,7 +547,6 @@ export default function Dashboard() {
                 </div>
               </div>
             ) : null}
-
             <div className="absolute bottom-3 left-3 bg-black/70 px-2.5 py-1.5 rounded-lg text-white text-xs font-mono backdrop-blur-sm">
               {currentTime.toLocaleTimeString()}
             </div>
@@ -570,8 +571,7 @@ export default function Dashboard() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="p-4 border-b border-gray-100 flex items-center justify-between">
             <h3 className="font-bold text-gray-900 flex items-center gap-2">
-              <Bell className="w-4 h-4 text-amber-500" />
-              Alerts & Notifications
+              <Bell className="w-4 h-4 text-amber-500" />Alerts & Notifications
             </h3>
             <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-semibold">{alerts.length}</span>
           </div>
@@ -606,8 +606,8 @@ export default function Dashboard() {
         <div>
           <h2 className="text-sm font-bold text-gray-900 mb-3 px-1">Critical Metrics</h2>
           <div className="grid grid-cols-2 gap-3">
-            <SensorCard icon={Thermometer} title="Water Temp" value={sensorData.waterTemp} unit="°C"   min={20}    max={26}    color="bg-blue-500" />
-            <SensorCard icon={Droplets}    title="pH Level"   value={sensorData.ph}        unit=""     min={6.5}   max={7.5}   color="bg-purple-500" />
+            <SensorCard icon={Thermometer} title="Water Temp" value={sensorData.waterTemp} unit="°C" min={20}    max={26}    color="bg-blue-500" />
+            <SensorCard icon={Droplets}    title="pH Level"   value={sensorData.ph}        unit=""   min={6.5}   max={7.5}   color="bg-purple-500" />
           </div>
         </div>
 
@@ -626,21 +626,12 @@ export default function Dashboard() {
       </div>
 
       <BottomNavigation />
-
       {showControlsModal && (
-        <ControlsModal
-          localControls={localControls}
-          onControlChange={handleLocalControlChange}
-          onSave={handleQuickControlsSave}
-          onClose={() => setShowControlsModal(false)}
-        />
+        <ControlsModal localControls={localControls} onControlChange={handleLocalControlChange}
+          onSave={handleQuickControlsSave} onClose={() => setShowControlsModal(false)} />
       )}
       {showCameraModal && (
-        <CameraModal
-          isConnected={isCameraConnected}
-          streamUrl={LIVE_STREAM_URL}
-          onClose={() => setShowCameraModal(false)}
-        />
+        <CameraModal isConnected={isCameraConnected} streamUrl={LIVE_STREAM_URL} onClose={() => setShowCameraModal(false)} />
       )}
     </div>
   )
