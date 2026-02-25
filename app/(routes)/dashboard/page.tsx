@@ -95,6 +95,13 @@ const localStorageKey = 'aquaponics_settings_state';
 
 // --- HELPER FUNCTIONS ---
 const loadState = (): { controls: SystemControls, activePreset: string, thresholds: ThresholdState } => { 
+  if (typeof window === "undefined") {
+    return { 
+      controls: INITIAL_CONTROLS_FULL, 
+      activePreset: "balanced", 
+      thresholds: INITIAL_THRESHOLDS, 
+    }
+  }
   try { 
     const savedState = localStorage.getItem(localStorageKey); 
     if (savedState) return JSON.parse(savedState); 
@@ -130,7 +137,12 @@ const calculatePercentage = (value: number, min: number, max: number) =>
 
 // --- CUSTOM HOOKS ---
 const useAquaponicsSettings = () => {
-  const [state, setState] = useState(loadState);
+  const [state, setState] = useState(() => {
+  if (typeof window === "undefined") {
+    return { controls: INITIAL_CONTROLS_FULL, activePreset: "balanced", thresholds: INITIAL_THRESHOLDS }
+  }
+  return loadState()
+})
 
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
