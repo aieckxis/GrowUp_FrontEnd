@@ -25,8 +25,6 @@ import { usePathname } from "next/navigation"
 interface SensorDataState {
   waterTemp: number;
   ph: number;
-  dissolvedO2: number;
-  ammonia: number;
   airTemp: number;
   waterFlow: number;
   airHumidity: number;
@@ -47,8 +45,6 @@ interface SystemControls { pump: boolean; fan: boolean; phAdjustment: boolean; a
 interface ThresholdState {
   waterTemp: { min: number; max: number };
   ph: { min: number; max: number };
-  dissolvedO2: { min: number; max: number };
-  ammonia: { min: number; max: number };
   airTemp: { min: number; max: number };
   waterFlow: { min: number; max: number }; // For Submersible Pump
   airHumidity: { min: number; max: number }; // For DC Fan (relative humidity)
@@ -74,8 +70,6 @@ const INITIAL_CONTROLS_FULL: SystemControls = { pump: true, fan: false, phAdjust
 const INITIAL_THRESHOLDS: ThresholdState = {
   waterTemp: { min: 22, max: 26 },
   ph: { min: 6.5, max: 7.5 },
-  dissolvedO2: { min: 5, max: 8 },
-  ammonia: { min: 0, max: 0.5 },
   airTemp: { min: 22, max: 28 },
   waterFlow: { min: 8, max: 12 },
   airHumidity: { min: 50, max: 70 },
@@ -100,7 +94,6 @@ const timeAgo = (date: Date) => {
 // Generate alerts based on live sensor values
 const generateAlerts = (
   sensor: SensorDataState,
-  // Kailangan nating i-include ang lahat ng bagong threshold keys dito
   thresholds: ThresholdState & {
     waterFlow?: { min: number; max: number };
     airHumidity?: { min: number; max: number };
@@ -136,28 +129,6 @@ const generateAlerts = (
     alerts.push({
       id: 4, type: "warning", severity: "medium", title: "pH Level High",
       message: `Current pH is ${sensor.ph}. Above safe range.`, time: timeAgo(now),
-    })
-  }
-
-  // --- Dissolved Oxygen (EXISTING) ---
-  if (sensor.dissolvedO2 < thresholds.dissolvedO2.min) {
-    alerts.push({
-      id: 5, type: "warning", severity: "high", title: "Dissolved Oxygen Low",
-      message: `DO is ${sensor.dissolvedO2} mg/L. Aeration required immediately.`, time: timeAgo(now),
-    })
-  }
-  if (sensor.dissolvedO2 > thresholds.dissolvedO2.max) {
-    alerts.push({
-      id: 6, type: "info", severity: "low", title: "Dissolved Oxygen Slightly High",
-      message: `DO is ${sensor.dissolvedO2} mg/L, slightly above optimal.`, time: timeAgo(now),
-    })
-  }
-
-  // --- Ammonia (EXISTING) ---
-  if (sensor.ammonia > thresholds.ammonia.max) {
-    alerts.push({
-      id: 7, type: "warning", severity: "high", title: "Ammonia Level High",
-      message: `Ammonia at ${sensor.ammonia} ppm. Toxic levels detected.`, time: timeAgo(now),
     })
   }
 
@@ -494,8 +465,6 @@ export default function SettingsPage() {
   const mockSensorData: SensorDataState = {
     waterTemp: 24.0,
     ph: 7.0,
-    dissolvedO2: 6.5,
-    ammonia: 0.1,
     airTemp: 25.0,
     waterFlow: 10.0,
     airHumidity: 60.0,
@@ -503,7 +472,6 @@ export default function SettingsPage() {
   };
 
   const currentAlerts = generateAlerts(mockSensorData, thresholds);
-  // Ang variable na 'systemStatus' ay hindi na ginagamit sa JSX, pero kailangan pa rin ito para sa 'currentAlerts' logic.
   const systemStatus = checkSystemStatus(currentAlerts);
 
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -529,8 +497,6 @@ export default function SettingsPage() {
         newThresholds = {
           waterTemp: { min: 22.0, max: 26.0 },
           ph: { min: 6.5, max: 7.5 },
-          dissolvedO2: { min: 5.5, max: 8.0 },
-          ammonia: { min: 0.0, max: 0.2 },
           airTemp: { min: 22.0, max: 28.0 },
           waterFlow: { min: 8.0, max: 12.0 },
           airHumidity: { min: 50.0, max: 70.0 },
@@ -543,8 +509,6 @@ export default function SettingsPage() {
         newThresholds = {
           waterTemp: { min: 23.5, max: 25.0 },
           ph: { min: 6.0, max: 7.0 },
-          dissolvedO2: { min: 6.0, max: 8.5 },
-          ammonia: { min: 0.0, max: 0.1 },
           airTemp: { min: 24.0, max: 26.0 },
           waterFlow: { min: 10.0, max: 15.0 },
           airHumidity: { min: 60.0, max: 80.0 },
@@ -557,8 +521,6 @@ export default function SettingsPage() {
         newThresholds = {
           waterTemp: { min: 21.0, max: 27.0 },
           ph: { min: 6.0, max: 8.0 },
-          dissolvedO2: { min: 5.0, max: 8.0 },
-          ammonia: { min: 0.0, max: 0.5 },
           airTemp: { min: 20.0, max: 30.0 },
           waterFlow: { min: 5.0, max: 10.0 },
           airHumidity: { min: 40.0, max: 70.0 },
@@ -571,8 +533,6 @@ export default function SettingsPage() {
         newThresholds = {
           waterTemp: { min: 22.0, max: 26.0 },
           ph: { min: 6.5, max: 7.5 },
-          dissolvedO2: { min: 5.5, max: 8.0 },
-          ammonia: { min: 0.0, max: 0.2 },
           airTemp: { min: 22.0, max: 28.0 },
           waterFlow: { min: 0.0, max: 1.0 },
           airHumidity: { min: 40.0, max: 80.0 },
@@ -684,28 +644,6 @@ export default function SettingsPage() {
                 maxLimit={8.0}
                 onMinChange={(val) => handleThresholdChange('ph', 'min', val)}
                 onMaxChange={(val) => handleThresholdChange('ph', 'max', val)}
-              />
-              <ThresholdRangeInput
-                label="Dissolved Oxygen"
-                unit="mg/L"
-                icon={Activity}
-                minValue={thresholds.dissolvedO2.min}
-                maxValue={thresholds.dissolvedO2.max}
-                minLimit={5}
-                maxLimit={10}
-                onMinChange={(val) => handleThresholdChange('dissolvedO2', 'min', val)}
-                onMaxChange={(val) => handleThresholdChange('dissolvedO2', 'max', val)}
-              />
-              <ThresholdRangeInput
-                label="Ammonia Level"
-                unit="ppm"
-                icon={AlertTriangle}
-                minValue={thresholds.ammonia.min}
-                maxValue={thresholds.ammonia.max}
-                minLimit={0.01}
-                maxLimit={2}
-                onMinChange={(val) => handleThresholdChange('ammonia', 'min', val)}
-                onMaxChange={(val) => handleThresholdChange('ammonia', 'max', val)}
               />
               <ThresholdRangeInput
                 label="Water Flow Rate"
